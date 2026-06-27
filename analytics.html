@@ -1,0 +1,124 @@
+{% extends 'base.html' %}
+{% block content %}
+<style>
+    .custom-scrollbar::-webkit-scrollbar {
+        width: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+        background: transparent;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+        background-color: #a8a29e; /* Matches your text-ink-muted variables */
+        border-radius: 20px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+        background-color: #e8704a; /* Turns into your vibrant terra accent color on active hover */
+    }
+</style>
+
+<div class="space-y-8">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-cream-border pb-5">
+        <div>
+            <h1 class="text-2xl font-black text-ink tracking-tight">Platform Performance</h1>
+            <p class="text-xs text-ink-muted mt-0.5">Track engagement metrics and system telemetry streams across your content assets</p>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="bg-white border border-cream-border rounded-2xl p-6 flex items-center justify-between shadow-premium transition-transform hover:-translate-y-0.5 duration-300">
+            <div class="space-y-1">
+                <p class="text-[10px] font-black text-ink-muted uppercase tracking-wider">Total Verified Videos</p>
+                <h3 class="text-4xl font-black text-ink tracking-tight font-mono">{{ total_videos or 0 }}</h3>
+            </div>
+            <div class="w-12 h-12 rounded-xl bg-terra-light border border-orange-100 text-terra flex items-center justify-center text-xl shadow-inner">
+                <i class="bi bi-film"></i>
+            </div>
+        </div>
+
+        <div class="bg-white border border-cream-border rounded-2xl p-6 flex items-center justify-between shadow-premium transition-transform hover:-translate-y-0.5 duration-300">
+            <div class="space-y-1">
+                <p class="text-[10px] font-black text-ink-muted uppercase tracking-wider">Total Accumulated Views</p>
+                <h3 class="text-4xl font-black text-ink tracking-tight font-mono">{{ total_views or 0 }}</h3>
+            </div>
+            <div class="w-12 h-12 rounded-xl bg-emerald-50 border border-emerald-100 text-emerald-600 flex items-center justify-center text-xl shadow-inner">
+                <i class="bi bi-eye"></i>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        
+        <div class="bg-white border border-cream-border rounded-2xl p-6 shadow-premium flex flex-col">
+            <h3 class="text-sm font-bold text-ink mb-4 flex items-center gap-2">
+                <i class="bi bi-graph-up-arrow text-terra"></i> Most Viewed Media Assets
+            </h3>
+            
+            <div class="w-full max-h-[380px] overflow-y-auto pr-1 rounded-xl border border-cream-border bg-cream/30 custom-scrollbar">
+                <table class="w-full text-left border-collapse text-xs">
+                    <thead class="sticky top-0 z-10">
+                        <tr class="border-b border-cream-border bg-stone-100 text-[10px] font-black text-ink-soft uppercase tracking-wider">
+                            <th class="px-4 py-3.5">Video Title</th>
+                            <th class="px-4 py-3.5">Upload Date</th>
+                            <th class="px-4 py-3.5 text-right">Views</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-cream-border text-ink-soft font-medium">
+                        {% for video in top_videos %}
+                        <tr class="hover:bg-cream/40 transition-colors">
+                            <td class="px-4 py-3 font-bold text-ink truncate max-w-[180px]">{{ video.title }}</td>
+                            <td class="px-4 py-3 text-ink-muted font-mono">
+                                {{ video.upload_date.strftime('%Y-%m-%d') if video.upload_date else 'Recent Log' }}
+                            </td>
+                            <td class="px-4 py-3 text-right font-black text-terra font-mono text-sm">{{ video.views }}</td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="3" class="px-4 py-6 text-center text-ink-muted italic">No active video data logs present.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="bg-white border border-cream-border rounded-2xl p-6 shadow-premium flex flex-col">
+            <h3 class="text-sm font-bold text-ink mb-4 flex items-center gap-2">
+                <i class="bi bi-clock-history text-emerald-600"></i> Recent System Upload Activity
+            </h3>
+            
+            <div class="w-full max-h-[380px] overflow-y-auto pr-1 rounded-xl border border-cream-border bg-cream/30 custom-scrollbar">
+                <table class="w-full text-left border-collapse text-xs">
+                    <thead class="sticky top-0 z-10">
+                        <tr class="border-b border-cream-border bg-stone-100 text-[10px] font-black text-ink-soft uppercase tracking-wider">
+                            <th class="px-4 py-3.5">Video Title</th>
+                            <th class="px-4 py-3.5">Timestamp Log</th>
+                            <th class="px-4 py-3.5 text-right">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-cream-border text-ink-soft font-medium">
+                        {% for video in recent_videos %}
+                        <tr class="hover:bg-cream/40 transition-colors">
+                            <td class="px-4 py-3 font-bold text-ink truncate max-w-[180px]">{{ video.title }}</td>
+                            <td class="px-4 py-3 text-ink-muted font-mono">
+                                {{ video.upload_date.strftime('%A, %b %d') if video.upload_date else 'Recent' }}
+                            </td>
+                            <td class="px-4 py-3 text-right">
+                                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold tracking-wide {% if video.status == 'Ready' %}text-emerald-700 bg-emerald-50 border border-emerald-100{% else %}text-amber-700 bg-amber-50 border border-amber-100 animate-pulse{% endif %}">
+                                    <span class="w-1 h-1 rounded-full mr-1.5 {% if video.status == 'Ready' %}bg-emerald-500{% else %}bg-amber-500{% endif %}"></span>
+                                    {{ video.status }}
+                                </span>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="3" class="px-4 py-6 text-center text-ink-muted italic">No transaction records found inside the engine datastore.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

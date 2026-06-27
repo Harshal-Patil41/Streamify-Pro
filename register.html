@@ -1,0 +1,239 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="relative min-h-[85vh] w-full flex items-center justify-center overflow-hidden py-6 px-4">
+    
+    <div id="register-3d-plexus" class="absolute inset-0 w-full h-full pointer-events-none z-0"></div>
+    
+    <div class="w-full max-w-md z-10 space-y-8 animate-fadeIn">
+        
+        <div class="text-center">
+            <div class="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-gradient-to-tr from-terra to-orange-500 text-white shadow-premium mb-4 hover:scale-105 transition-transform duration-300">
+                <i class="bi bi-person-plus-fill text-xl"></i>
+            </div>
+            <h2 class="text-2xl font-black text-ink tracking-tight">Create Workspace</h2>
+            <p class="text-xs text-ink-muted mt-1 font-medium">Register a new operator node on the pipeline</p>
+        </div>
+
+        <div class="bg-white/85 backdrop-blur-lg border border-cream-border rounded-2xl p-6 sm:p-8 shadow-premium relative overflow-hidden transition-all duration-500 hover:shadow-floating">
+            
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="mb-4 p-3 bg-rose-50 border border-rose-100 text-rose-700 rounded-xl text-xs font-bold flex items-center gap-2">
+                            <i class="bi bi-exclamation-circle-fill"></i> {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <form action="{{ url_for('register') }}" method="POST" class="space-y-4">
+                <div class="space-y-1.5">
+                    <label class="block text-[10px] font-black text-ink-soft uppercase tracking-wider">Operator Identity (Username)</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-ink-muted text-xs">
+                            <i class="bi bi-person-fill"></i>
+                        </div>
+                        <input type="text" name="username" required
+                               class="w-full bg-cream/40 border border-cream-border focus:border-terra focus:ring-1 focus:ring-terra text-ink text-xs rounded-xl pl-10 pr-4 py-3.5 focus:outline-none transition-all placeholder:text-ink-muted font-medium"
+                               placeholder="e.g., harshal_patil">
+                    </div>
+                </div>
+
+                <div class="space-y-1.5">
+                    <label class="block text-[10px] font-black text-ink-soft uppercase tracking-wider">Email Address</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-ink-muted text-xs">
+                            <i class="bi bi-envelope-fill"></i>
+                        </div>
+                        <input type="email" name="email" required
+                               class="w-full bg-cream/40 border border-cream-border focus:border-terra focus:ring-1 focus:ring-terra text-ink text-xs rounded-xl pl-10 pr-4 py-3.5 focus:outline-none transition-all placeholder:text-ink-muted font-medium"
+                               placeholder="name@company.com">
+                    </div>
+                </div>
+
+                <div class="space-y-1.5">
+                    <label class="block text-[10px] font-black text-ink-soft uppercase tracking-wider">Security Password</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-ink-muted text-xs">
+                            <i class="bi bi-lock-fill"></i>
+                        </div>
+                        <input type="password" name="password" required
+                               class="w-full bg-cream/40 border border-cream-border focus:border-terra focus:ring-1 focus:ring-terra text-ink text-xs rounded-xl pl-10 pr-4 py-3.5 focus:outline-none transition-all placeholder:text-ink-muted"
+                               placeholder="••••••••">
+                    </div>
+                </div>
+
+                <button type="submit" class="w-full py-3.5 bg-terra hover:bg-terra-dark text-white text-xs font-black uppercase tracking-wider rounded-xl shadow-premium transition-all duration-300 hover:scale-[1.01] active:scale-[0.99] mt-3">
+                    Initialize Operator Node
+                </button>
+            </form>
+
+            <div class="mt-6 pt-5 border-t border-cream-border text-center">
+                <p class="text-xs text-ink-soft font-medium">
+                    Already registered in the pipeline? 
+                    <a href="{{ url_for('login') }}" class="text-terra font-black hover:text-terra-dark ml-1 transition-colors">Sign In</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+(function() {
+    const container = document.getElementById('register-3d-plexus');
+    if (!container) return;
+
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0xf4f6f9); // Match login layout color background tint
+
+    const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 1, 1000);
+    camera.position.z = 55;
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+    renderer.setSize(container.clientWidth, container.clientHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    container.appendChild(renderer.domElement);
+
+    const maxParticles = 70;
+    const segments = maxParticles * maxParticles;
+
+    const positions = new Float32Array(maxParticles * 3);
+    const linePositions = new Float32Array(segments * 3);
+    const lineColors = new Float32Array(segments * 3);
+
+    const particlePositions = [];
+    const particleSpeeds = [];
+
+    const rX = 55, rY = 35, rZ = 25;
+
+    for (let i = 0; i < maxParticles; i++) {
+        const x = (Math.random() - 0.5) * rX;
+        const y = (Math.random() - 0.5) * rY;
+        const z = (Math.random() - 0.5) * rZ;
+
+        positions[i * 3] = x;
+        positions[i * 3 + 1] = y;
+        positions[i * 3 + 2] = z;
+
+        particlePositions.push(new THREE.Vector3(x, y, z));
+        particleSpeeds.push(new THREE.Vector3(
+            (Math.random() - 0.5) * 0.03,
+            (Math.random() - 0.5) * 0.03,
+            (Math.random() - 0.5) * 0.015
+        ));
+    }
+
+    const pGeometry = new THREE.BufferGeometry();
+    pGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+
+    // Sharp Navy Blue Particle Core Nodes
+    const pMaterial = new THREE.PointsMaterial({
+        color: 0x1e3a8a, // Rich Navy Blue
+        size: 0.5,
+        transparent: true,
+        opacity: 0.85
+    });
+
+    const pointCloud = new THREE.Points(pGeometry, pMaterial);
+    scene.add(pointCloud);
+
+    const lGeometry = new THREE.BufferGeometry();
+    lGeometry.setAttribute('position', new THREE.BufferAttribute(linePositions, 3));
+    lGeometry.setAttribute('color', new THREE.BufferAttribute(lineColors, 3));
+
+    const lMaterial = new THREE.LineBasicMaterial({
+        vertexColors: true,
+        transparent: true,
+        blending: THREE.AdditiveBlending,
+        opacity: 0.45
+    });
+
+    const lineMesh = new THREE.LineSegments(lGeometry, lMaterial);
+    scene.add(lineMesh);
+
+    let targetX = 0, targetY = 0;
+    let curX = 0, curY = 0;
+
+    window.addEventListener('mousemove', (e) => {
+        targetX = (e.clientX - window.innerWidth / 2) * 0.02;
+        targetY = (e.clientY - window.innerHeight / 2) * 0.02;
+    });
+
+    function animatePlexus() {
+        requestAnimationFrame(animatePlexus);
+
+        curX += (targetX - curX) * 0.05;
+        curY += (targetY - curY) * 0.05;
+
+        pointCloud.rotation.y = curX * 0.08;
+        pointCloud.rotation.x = curY * 0.08;
+        lineMesh.rotation.y = curX * 0.08;
+        lineMesh.rotation.x = curY * 0.08;
+
+        let vertexpos = 0;
+        let colorpos = 0;
+        let numConnections = 0;
+
+        for (let i = 0; i < maxParticles; i++) {
+            const pos = particlePositions[i];
+            const speed = particleSpeeds[i];
+
+            pos.x += speed.x;
+            pos.y += speed.y;
+            pos.z += speed.z;
+
+            if (pos.x > rX/2 || pos.x < -rX/2) speed.x *= -1;
+            if (pos.y > rY/2 || pos.y < -rY/2) speed.y *= -1;
+            if (pos.z > rZ/2 || pos.z < -rZ/2) speed.z *= -1;
+
+            positions[i * 3] = pos.x;
+            positions[i * 3 + 1] = pos.y;
+            positions[i * 3 + 2] = pos.z;
+
+            for (let j = i + 1; j < maxParticles; j++) {
+                const pos2 = particlePositions[j];
+                const dist = pos.distanceTo(pos2);
+                const limit = 10.0; 
+
+                if (dist < limit) {
+                    const alpha = 1.0 - (dist / limit);
+
+                    linePositions[vertexpos++] = pos.x;
+                    linePositions[vertexpos++] = pos.y;
+                    linePositions[vertexpos++] = pos.z;
+
+                    linePositions[vertexpos++] = pos2.x;
+                    linePositions[vertexpos++] = pos2.y;
+                    linePositions[vertexpos++] = pos2.z;
+
+                    // Glowing Navy/Electric Blue Vector Lines
+                    lineColors[colorpos++] = 0.12 * alpha; 
+                    lineColors[colorpos++] = 0.28 * alpha; 
+                    lineColors[colorpos++] = 0.65 * alpha; 
+
+                    lineColors[colorpos++] = 0.12 * alpha; 
+                    lineColors[colorpos++] = 0.28 * alpha; 
+                    lineColors[colorpos++] = 0.65 * alpha; 
+
+                    numConnections++;
+                }
+            }
+        }
+
+        pGeometry.attributes.position.needsUpdate = true;
+        lGeometry.attributes.position.needsUpdate = true;
+        lGeometry.attributes.color.needsUpdate = true;
+
+        lGeometry.setDrawRange(0, numConnections * 2);
+        renderer.render(scene, camera);
+    }
+    animatePlexus();
+
+    window.addEventListener('resize', () => {
+        camera.aspect = container.clientWidth / container.clientHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(container.clientWidth, container.clientHeight);
+    });
+})();
+</script>
+{% endblock %}

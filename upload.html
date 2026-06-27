@@ -1,0 +1,105 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="space-y-8">
+    <div>
+        <h1 class="text-2xl font-black text-ink tracking-tight">Upload Studio</h1>
+        <p class="text-xs text-ink-muted mt-0.5">Upload, optimize, and publish high-performance media pipeline assets across node tracks</p>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+        
+        <div class="lg:col-span-2 space-y-6">
+            <form action="{{ url_for('upload') }}" method="POST" enctype="multipart/form-data" class="bg-white border border-cream-border rounded-2xl p-6 space-y-6 shadow-premium relative">
+                
+                <div class="space-y-1.5">
+                    <label class="block text-[10px] font-black text-ink-soft uppercase tracking-wider">Video Production Layout Title</label>
+                    <input type="text" name="title" required maxlength="100"
+                           class="w-full bg-cream/40 border border-cream-border focus:border-terra focus:ring-1 focus:ring-terra text-ink text-xs rounded-xl px-4 py-3.5 focus:outline-none transition-all placeholder:text-ink-muted font-medium" 
+                           placeholder="Specify tracking asset configuration label...">
+                </div>
+
+                <div class="space-y-1.5">
+                    <label class="block text-[10px] font-black text-ink-soft uppercase tracking-wider">Select Media Stream Storage File</label>
+                    <div id="dropzone" onclick="document.getElementById('videoFile').click();" 
+                         class="group relative border-2 border-dashed border-cream-border hover:border-terra/40 rounded-2xl bg-cream/20 p-10 text-center cursor-pointer transition-all">
+                        
+                        <input type="file" name="video_file" id="videoFile" required accept="video/*"
+                               class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-30"
+                               onchange="updateFileName(this)" onclick="event.stopPropagation();">
+                        
+                        <div class="space-y-3 pointer-events-none">
+                            <div class="text-4xl text-terra/80 group-hover:scale-110 transition-transform duration-300">
+                                <i class="bi bi-cloud-arrow-up-fill"></i>
+                            </div>
+                            <p id="fileStatusText" class="text-xs font-bold text-ink-soft">Drag & Drop your high resolution video file here</p>
+                            <p class="text-[11px] text-ink-muted">or <span class="px-3 py-1 bg-white border border-cream-border text-ink-soft rounded-lg text-[10px] font-black inline-block ml-1 hover:bg-cream shadow-sm">Browse Local Storage</span></p>
+                            <p class="text-[10px] text-ink-muted/80 pt-2 font-medium">Supports: MP4, MOV, AVI, MKV • Max allocation limit: 2GB</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="fileNameDisplay" class="hidden border border-emerald-100 bg-emerald-50/40 rounded-xl p-4 flex items-center justify-between animate-fadeIn">
+                    <div class="flex items-center gap-3 min-w-0">
+                        <div class="w-10 h-10 rounded-lg bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-600 flex-shrink-0 shadow-inner">
+                            <i class="bi bi-film"></i>
+                        </div>
+                        <div class="truncate">
+                            <p id="nameText" class="text-xs font-black text-emerald-900 truncate"></p>
+                            <span class="text-[10px] text-emerald-600 font-bold tracking-wide flex items-center gap-1"><span class="w-1 h-1 bg-emerald-500 rounded-full animate-ping"></span> Staged Local Configuration Stored</span>
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="w-full py-3.5 bg-terra hover:bg-terra-dark text-white text-xs font-black uppercase tracking-wider rounded-xl shadow-premium transition-all hover:scale-[1.01] active:scale-[0.99]">
+                    Publish and Process Pipeline Asset
+                </button>
+            </form>
+        </div>
+
+        <div class="space-y-6">
+            <div class="bg-white border border-cream-border rounded-2xl p-5 space-y-4 shadow-premium">
+                <h3 class="text-[10px] font-black text-ink uppercase tracking-wider flex items-center gap-2"><i class="bi bi-lightbulb-fill text-terra"></i> System Upload Specifications</h3>
+                <ul class="space-y-2.5 text-xs text-ink-soft font-medium">
+                    <li class="flex items-start gap-2"><i class="bi bi-check-circle-fill text-terra text-xs mt-0.5"></i> <span>Maintain resolution constraints at 1080p for encoding streams.</span></li>
+                    <li class="flex items-start gap-2"><i class="bi bi-check-circle-fill text-terra text-xs mt-0.5"></i> <span>Preferred wide aspect visual matrix ratios configured to 16:9.</span></li>
+                    <li class="flex items-start gap-2"><i class="bi bi-check-circle-fill text-terra text-xs mt-0.5"></i> <span>Local execution pipeline natively maps MP4 container metadata wrappers.</span></li>
+                </ul>
+            </div>
+
+            <div class="bg-white border border-cream-border rounded-2xl p-5 space-y-4 shadow-premium">
+                <h3 class="text-[10px] font-black text-ink uppercase tracking-wider flex items-center gap-2"><i class="bi bi-hdd-network-fill text-terra"></i> Data Allocation Node Tracker</h3>
+                <div class="space-y-3">
+                    <div>
+                        <div class="flex justify-between text-[11px] text-ink-soft font-bold mb-1.5">
+                            <span>Local Allocation Block Capacity Used</span>
+                            <span class="font-black text-terra font-mono">68%</span>
+                        </div>
+                        <div class="w-full h-2 bg-cream border border-cream-border rounded-full overflow-hidden shadow-inner">
+                            <div class="h-full bg-gradient-to-r from-terra to-orange-400 rounded-full" style="width: 68%"></div>
+                        </div>
+                    </div>
+                    <p class="text-[10px] text-ink-muted font-medium leading-normal">System cleanup pipeline threads evaluate asynchronous system execution nodes to purge transient workspace caches automatically.</p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    function updateFileName(input) {
+        const display = document.getElementById('fileNameDisplay');
+        const text = document.getElementById('nameText');
+        const statusText = document.getElementById('fileStatusText');
+        
+        if (input.files && input.files.length > 0) {
+            text.innerText = input.files[0].name;
+            statusText.innerText = "Staged: " + input.files[0].name;
+            display.classList.remove('hidden');
+        } else {
+            display.classList.add('hidden');
+            statusText.innerText = "Drag & Drop your high resolution video file here";
+        }
+    }
+</script>
+{% endblock %}

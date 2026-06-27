@@ -1,0 +1,6 @@
+venv/
+__pycache__/
+*.db
+.env
+static/streams/
+static/thumbnails/

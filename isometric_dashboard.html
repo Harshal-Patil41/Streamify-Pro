@@ -1,0 +1,274 @@
+<script>
+// ==========================================================
+// HIGH-RESOLUTION SHARP ISOMETRIC STUDIO WITH PARTICLE MIST
+// ==========================================================
+
+const container = document.getElementById('three-container');
+const rawData = document.getElementById('video-data').textContent.trim();
+const videoData = rawData ? JSON.parse(rawData) : [];
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0xfcfaf7); 
+
+// Isometric Camera System Setup
+const aspect = container.clientWidth / container.clientHeight;
+const d = 11; 
+const camera = new THREE.OrthographicCamera(-d * aspect, d * aspect, d, -d, 1, 1000);
+camera.position.set(35, 30, 35); 
+camera.lookAt(0, 1, 0);
+
+const renderer = new THREE.WebGLRenderer({ 
+    antialias: true,              
+    alpha: false, 
+    powerPreference: "high-performance" 
+});
+renderer.setSize(container.clientWidth, container.clientHeight);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.toneMapping = THREE.ACESFilmicToneMapping; 
+renderer.toneMappingExposure = 1.1;
+container.appendChild(renderer.domElement);
+
+const controls = new THREE.OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
+controls.dampingFactor = 0.04;
+controls.minZoom = 0.7;
+controls.maxZoom = 1.8;
+controls.target.set(0, 1, 0);
+controls.maxPolarAngle = Math.PI / 2.3;
+
+// ==========================================================
+// ✨ NEW: PREMIUM ANIMATED BACKGROUND BACKGROUND PARTICLES
+// ==========================================================
+const particleCount = 200;
+const particleGeometry = new THREE.BufferGeometry();
+const positions = new Float32Array(particleCount * 3);
+
+for (let i = 0; i < particleCount * 3; i += 3) {
+    // Distribute particles in a wide spatial cloud around the stage platform
+    positions[i] = (Math.random() - 0.5) * 40;     // X axis stretch
+    positions[i + 1] = Math.random() * 15;          // Y axis altitude height
+    positions[i + 2] = (Math.random() - 0.5) * 40; // Z axis stretch
+}
+
+particleGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+
+// Premium soft-glowing circular particle styling
+const particleMaterial = new THREE.PointsMaterial({
+    color: 0xe8704a,      // Matches your Terra color accent
+    size: 0.15,
+    transparent: true,
+    opacity: 0.4,
+    blending: THREE.AdditiveBlending
+});
+
+const particleSystem = new THREE.Points(particleGeometry, particleMaterial);
+scene.add(particleSystem);
+
+// ==========================================================
+// STUDIO LIGHTING SCHEME
+// ==========================================================
+const ambientLight = new THREE.AmbientLight(0xfffbf9, 0.9); 
+scene.add(ambientLight);
+
+const sunLight = new THREE.DirectionalLight(0xe8704a, 1.1); 
+sunLight.position.set(25, 40, 20);
+sunLight.castShadow = true;
+sunLight.shadow.mapSize.width = 2048;
+sunLight.shadow.mapSize.height = 2048;
+sunLight.shadow.bias = -0.0002;
+scene.add(sunLight);
+
+// ==========================================================
+// PREMIUM GALLERY STAGE PLATFORM
+// ==========================================================
+const groundGroup = new THREE.Group();
+scene.add(groundGroup);
+
+const stageGeo = new THREE.BoxGeometry(32, 0.6, 26);
+const stageMat = new THREE.MeshStandardMaterial({ 
+    color: 0xffffff, 
+    roughness: 0.5, 
+    metalness: 0.0
+});
+const stage = new THREE.Mesh(stageGeo, stageMat);
+stage.position.y = -0.3;
+stage.receiveShadow = true;
+groundGroup.add(stage);
+
+const gridHelper = new THREE.GridHelper(30, 20, 0xe8e0d4, 0xf3ede4);
+gridHelper.position.y = 0.01;
+gridHelper.material.opacity = 0.4;
+gridHelper.material.transparent = true;
+groundGroup.add(gridHelper);
+
+// ==========================================================
+// CORE PIPELINE VIDEO CARD GENERATOR
+// ==========================================================
+const cards = [];
+const cardGroup = new THREE.Group();
+scene.add(cardGroup);
+
+function createVideoCard(video, x, z) {
+    const cardWidth = 4.4;
+    const cardHeight = 2.9;
+    const cardDepth = 0.35;
+    
+    const geometry = new THREE.BoxGeometry(cardWidth, cardHeight, cardDepth);
+    const canvas = document.createElement('canvas');
+    canvas.width = 512;
+    canvas.height = 340;
+    const ctx = canvas.getContext('2d');
+    
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, 512, 340);
+    
+    const thumbImg = new Image();
+    thumbImg.crossOrigin = 'anonymous';
+    thumbImg.onload = () => {
+        ctx.drawImage(thumbImg, 0, 0, 512, 235);
+        ctx.fillStyle = '#1c1917'; 
+        ctx.fillRect(0, 235, 512, 105);
+        
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 26px sans-serif'; 
+        ctx.fillText(video.title.substring(0, 24), 25, 278);
+        
+        const statusColor = video.status === 'Ready' ? '#10b981' : '#f59e0b';
+        ctx.fillStyle = statusColor;
+        ctx.font = 'bold 20px sans-serif';
+        ctx.fillText(`● ${video.status}`, 25, 312);
+        
+        ctx.fillStyle = '#a8a29e';
+        ctx.font = '18px sans-serif';
+        ctx.fillText(`${video.views} views · ${video.upload_date}`, 145, 312);
+        texture.needsUpdate = true;
+    };
+    thumbImg.src = video.thumbnail_url ? video.thumbnail_url : 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=640&auto=format&fit=crop';
+    
+    const texture = new THREE.CanvasTexture(canvas);
+    texture.minFilter = THREE.LinearFilter;
+    texture.magFilter = THREE.LinearFilter;
+    texture.generateMipmaps = false;
+    
+    const cardSideMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.3, metalness: 0.0 });
+    const cardFrontMat = new THREE.MeshStandardMaterial({ map: texture, roughness: 0.4, metalness: 0.0 });
+    
+    const materials = [cardSideMat, cardSideMat, cardSideMat, cardSideMat, cardFrontMat, cardSideMat];
+    const card = new THREE.Mesh(geometry, materials);
+    
+    card.position.set(x, cardHeight / 2 + 0.4, z);
+    card.rotation.y = -Math.PI / 7; 
+    card.castShadow = true;
+    card.receiveShadow = true;
+    
+    card.userData = { 
+        video: video, 
+        originalY: cardHeight / 2 + 0.4, 
+        baseRotationY: -Math.PI / 7,
+        isHovered: false 
+    };
+    
+    cards.push(card);
+    cardGroup.add(card);
+}
+
+if (videoData.length > 0) {
+    const cols = 3;
+    const spacingX = 6.8; 
+    const spacingZ = 5.8;
+    
+    videoData.forEach((video, i) => {
+        const col = i % cols;
+        const row = Math.floor(i / cols);
+        const x = (col - 1) * spacingX;
+        const z = (row - 1) * spacingZ; 
+        createVideoCard(video, x, z);
+    });
+} else {
+    const geometry = new THREE.BoxGeometry(6, 0.4, 4);
+    const material = new THREE.MeshStandardMaterial({ color: 0xe8e0d4, roughness: 0.4 });
+    const placeholder = new THREE.Mesh(geometry, material);
+    placeholder.position.set(0, 0.2, 0);
+    scene.add(placeholder);
+}
+
+// ==========================================================
+// MOUSE INTERACTION ENGINE
+// ==========================================================
+const raycaster = new THREE.Raycaster();
+const mouse = new THREE.Vector2();
+
+container.addEventListener('mousemove', (e) => {
+    const rect = container.getBoundingClientRect();
+    mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+    mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+});
+
+container.addEventListener('click', () => {
+    raycaster.setFromCamera(mouse, camera);
+    const intersects = raycaster.intersectObjects(cards);
+    if (intersects.length > 0) {
+        const video = intersects[0].object.userData.video;
+        if (video && video.watch_url) window.location.href = video.watch_url;
+    }
+});
+
+function animate() {
+    requestAnimationFrame(animate);
+    raycaster.setFromCamera(mouse, camera);
+    const intersects = raycaster.intersectObjects(cards);
+    
+    // Animate Background Particles: Creates a beautiful slow-drifting tracking wave
+    const elapsedTime = Date.now() * 0.0001;
+    particleSystem.rotation.y = elapsedTime * 0.5; // Slow ambient spin
+    
+    const particlePositions = particleGeometry.attributes.position.array;
+    for (let i = 1; i < particleCount * 3; i += 3) {
+        particlePositions[i] -= 0.01; // Particles slowly sink down over time
+        if (particlePositions[i] < 0) {
+            particlePositions[i] = 15; // Reset back to the sky loop
+        }
+    }
+    particleGeometry.attributes.position.needsUpdate = true;
+
+    cards.forEach(card => {
+        if (card.userData.isHovered) {
+            card.position.y = card.userData.originalY;
+            card.rotation.y = card.userData.baseRotationY;
+            card.scale.set(1, 1, 1);
+            card.userData.isHovered = false;
+        }
+    });
+    
+    if (intersects.length > 0) {
+        const hovered = intersects[0].object;
+        hovered.position.y = hovered.userData.originalY + 0.5; 
+        hovered.rotation.y = hovered.userData.baseRotationY - 0.04; 
+        hovered.scale.set(1.02, 1.02, 1.02);
+        hovered.userData.isHovered = true;
+        container.style.cursor = 'pointer';
+    } else {
+        container.style.cursor = 'default';
+    }
+    
+    const time = Date.now() * 0.002;
+    cards.forEach((card, i) => {
+        if (!card.userData.isHovered) {
+            card.position.y = card.userData.originalY + Math.sin(time + i * 0.5) * 0.06;
+        }
+    });
+    
+    controls.update();
+    renderer.render(scene, camera);
+}
+animate();
+
+window.addEventListener('resize', () => {
+    const aspect = container.clientWidth / container.clientHeight;
+    camera.left = -d * aspect; camera.right = d * aspect;
+    camera.updateProjectionMatrix();
+    renderer.setSize(container.clientWidth, container.clientHeight);
+});
+</script>

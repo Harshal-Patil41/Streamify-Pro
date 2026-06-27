@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Streamify Pro — Creator Studio</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        sidebar: '#141210',
+                        'sidebar-border': '#231f1c',
+                        'sidebar-hover': '#1e1a17',
+                        cream: '#fcfaf7',
+                        'cream-border': '#ede6db',
+                        'cream-card': '#ffffff',
+                        terra: '#e8704a',
+                        'terra-dark': '#d15d38',
+                        'terra-light': '#fdf2ee',
+                        ink: '#1c1917',
+                        'ink-soft': '#57534e',
+                        'ink-muted': '#a8a29e',
+                    },
+                    boxShadow: {
+                        'premium': '0 4px 20px -2px rgba(28, 25, 23, 0.03), 0 2px 8px -1px rgba(28, 25, 23, 0.02)',
+                        'floating': '0 12px 30px -4px rgba(232, 112, 74, 0.08), 0 4px 12px -2px rgba(232, 112, 74, 0.04)',
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        body { background-color: #fcfaf7; }
+        
+        .sidebar-link { 
+            display: flex; 
+            align-items: center; 
+            gap: 12px; 
+            padding: 10px 14px; 
+            border-radius: 10px; 
+            font-size: 13px; 
+            font-weight: 600; 
+            color: #a8a29e; 
+            text-decoration: none;
+            transition: all 0.2s ease; 
+        }
+        
+        .sidebar-link:hover { 
+            background: #1e1a17; 
+            color: #fdf2ee; 
+        }
+        
+        .sidebar-link.active { 
+            background: #e8704a; 
+            color: #ffffff; 
+            box-shadow: 0 4px 12px rgba(232, 112, 74, 0.25); 
+        }
+        
+        .sidebar-link i { 
+            font-size: 16px; 
+            flex-shrink: 0; 
+        }
+        
+        /* Smooth custom browser scrollbar track blocks */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #fcfaf7; }
+        ::-webkit-scrollbar-thumb { background: #ede6db; border-radius: 20px; }
+        ::-webkit-scrollbar-thumb:hover { background: #a8a29e; }
+    </style>
+</head>
+<body class="text-ink antialiased min-h-screen flex selection:bg-terra/10 selection:text-terra">
+
+    <aside class="w-60 bg-sidebar flex flex-col justify-between py-6 px-4 shrink-0 hidden md:flex" style="min-height:100vh;">
+        <div class="space-y-8">
+            <div class="flex items-center gap-3 px-2">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-terra to-orange-600 flex items-center justify-center shadow-md">
+                    <i class="bi bi-camera-reels-fill text-white text-lg"></i>
+                </div>
+                <div>
+                    <h2 class="text-sm font-black text-white tracking-wide uppercase">Streamify Pro</h2>
+                    <p class="text-[10px] text-ink-muted font-bold tracking-wider">Creator Studio</p>
+                </div>
+            </div>
+
+            <div>
+                <p class="text-[10px] uppercase font-black tracking-[2px] text-stone-500 px-3 mb-4 block">Menu</p>
+                
+                <nav class="flex flex-col gap-1.5 w-full">
+                    <a href="{{ url_for('dashboard') }}" class="sidebar-link {% if request.path == '/dashboard' or request.path == '/' %}active{% endif %}">
+                        <i class="bi bi-grid-1x2-fill"></i>
+                        <span>Dashboard</span>
+                    </a>
+                    <a href="{{ url_for('upload') }}" class="sidebar-link {% if request.path == '/upload' %}active{% endif %}">
+                        <i class="bi bi-cloud-arrow-up-fill"></i>
+                        <span>Upload Studio</span>
+                    </a>
+                    <a href="{{ url_for('analytics') }}" class="sidebar-link {% if request.path == '/analytics' %}active{% endif %}">
+                        <i class="bi bi-bar-chart-line-fill"></i>
+                        <span>Analytics Node</span>
+                    </a>
+                </nav>
+            </div>
+        </div>
+
+        <div class="border-t border-sidebar-border pt-4 flex items-center justify-between">
+            <div class="flex items-center gap-3 min-w-0">
+                <div class="w-8 h-8 rounded-lg bg-terra flex items-center justify-center text-white text-xs font-black flex-shrink-0 shadow-sm">
+                    {% if current_user.is_authenticated %}{{ current_user.username[0].upper() }}{% else %}?{% endif %}
+                </div>
+                <div class="truncate">
+                    <p class="text-xs font-bold text-stone-200 truncate">
+                        {% if current_user.is_authenticated %}{{ current_user.username }}{% else %}Guest Node{% endif %}
+                    </p>
+                    <p class="text-[10px] text-stone-500 font-medium">System Operator</p>
+                </div>
+            </div>
+            {% if current_user.is_authenticated %}
+            <a href="{{ url_for('logout') }}" class="text-stone-500 hover:text-rose-400 transition-colors p-1.5 rounded-lg hover:bg-stone-900" title="Terminate Session">
+                <i class="bi bi-power text-sm"></i>
+            </a>
+            {% endif %}
+        </div>
+    </aside>
+
+    <div class="flex-grow flex flex-col min-w-0">
+        <header class="h-14 bg-cream-card border-b border-cream-border flex items-center justify-between px-6 md:px-8 shadow-[0_1px_2px_rgba(0,0,0,0.01)]">
+            <div class="flex items-center gap-2 text-xs font-semibold text-ink-soft">
+                <span class="relative flex h-2 w-2">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                </span>
+                <span>System Pipeline Status: Optimal</span>
+            </div>
+            <div class="flex items-center gap-4">
+                {% if current_user.is_authenticated %}
+                <div class="flex items-center gap-2 bg-cream-border/30 px-3 py-1 rounded-full border border-cream-border">
+                    <span class="w-1.5 h-1.5 rounded-full bg-terra"></span>
+                    <span class="text-xs font-bold text-ink-soft">{{ current_user.username }}</span>
+                </div>
+                {% endif %}
+            </div>
+        </header>
+
+        <main class="flex-grow p-6 lg:p-8 overflow-y-auto w-full">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                    <div class="mb-6 px-4 py-3.5 rounded-xl text-xs font-bold flex items-center gap-3 border shadow-sm transition-all animate-fadeIn
+                        {% if category == 'danger' %}bg-rose-50 text-rose-700 border-rose-100
+                        {% elif category == 'success' %}bg-emerald-50 text-emerald-700 border-emerald-100
+                        {% else %}bg-terra-light text-terra-dark border-orange-100{% endif %}">
+                        <i class="bi bi-info-circle-fill text-sm"></i> 
+                        <span>{{ message }}</span>
+                    </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+            
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+
+</body>
+</html>

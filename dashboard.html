@@ -1,0 +1,212 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="space-y-8">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-cream-border pb-5">
+        <div>
+            <h1 class="text-2xl font-black text-ink tracking-tight">Control Center</h1>
+            <p class="text-xs text-ink-muted mt-0.5">Track, update, and manage your active live asset streams</p>
+        </div>
+        
+        <a href="{{ url_for('upload') }}" class="inline-flex items-center gap-2 px-4 py-2.5 bg-terra hover:bg-terra-dark text-white text-xs font-bold rounded-xl shadow-premium transition-all hover:scale-[1.02] active:scale-[0.98]">
+            <i class="bi bi-plus-lg"></i> Upload Video Asset
+        </a>
+    </div>
+
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="bg-white border border-cream-border p-4 rounded-xl shadow-premium flex items-center justify-between">
+            <div>
+                <span class="text-[10px] font-bold uppercase tracking-wider text-ink-muted block">Total Videos</span>
+                <span class="text-xl font-black text-ink tracking-tight mt-0.5 block">{% if videos %}{{ videos|length }}{% else %}0{% endif %}</span>
+            </div>
+            <div class="w-8 h-8 rounded-lg bg-terra-light text-terra flex items-center justify-center text-sm"><i class="bi bi-film"></i></div>
+        </div>
+        <div class="bg-white border border-cream-border p-4 rounded-xl shadow-premium flex items-center justify-between">
+            <div>
+                <span class="text-[10px] font-bold uppercase tracking-wider text-ink-muted block">System Engine Node</span>
+                <span class="text-xl font-black text-emerald-600 tracking-tight mt-0.5 block">Active</span>
+            </div>
+            <div class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center text-sm"><i class="bi bi-cpu shadow-inner"></i></div>
+        </div>
+        <div class="bg-white border border-cream-border p-4 rounded-xl shadow-premium flex items-center justify-between">
+            <div>
+                <span class="text-[10px] font-bold uppercase tracking-wider text-ink-muted block">Data Mode Storage</span>
+                <span class="text-xl font-black text-indigo-600 tracking-tight mt-0.5 block">SQLite</span>
+            </div>
+            <div class="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center text-sm"><i class="bi bi-database shadow-inner"></i></div>
+        </div>
+        <div class="bg-white border border-cream-border p-4 rounded-xl shadow-premium flex items-center justify-between">
+            <div>
+                <span class="text-[10px] font-bold uppercase tracking-wider text-ink-muted block">Network Interface</span>
+                <span class="text-xl font-black text-amber-600 tracking-tight mt-0.5 block">Optimal</span>
+            </div>
+            <div class="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center text-sm"><i class="bi bi-activity shadow-inner"></i></div>
+        </div>
+    </div>
+
+    <div class="w-full max-w-xl mx-auto pt-2">
+        <form action="{{ url_for('dashboard') }}" method="GET" class="relative flex items-center">
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-ink-muted">
+                <i class="bi bi-search text-sm"></i>
+            </div>
+            <input 
+                type="text" 
+                name="search" 
+                value="{{ search_query }}" 
+                placeholder="Search security feeds or video assets..." 
+                class="w-full pl-10 pr-24 py-3 bg-white border border-cream-border text-ink rounded-xl text-sm font-medium focus:outline-none focus:border-terra focus:ring-1 focus:ring-terra transition-all shadow-premium placeholder:text-ink-muted/60"
+            >
+            <div class="absolute inset-y-0 right-0 flex items-center pr-1.5 gap-1">
+                {% if search_query %}
+                    <a href="{{ url_for('dashboard') }}" class="px-2.5 py-1.5 bg-cream text-ink-soft rounded-lg text-xs font-bold hover:bg-cream-border/60 transition-colors">
+                        Clear
+                    </a>
+                {% endif %}
+                <button type="submit" class="px-3.5 py-1.5 bg-terra hover:bg-terra-dark text-white rounded-lg text-xs font-bold transition-colors shadow-sm">
+                    Search
+                </button>
+            </div>
+        </form>
+        
+        {% if search_query %}
+            <p class="text-[11px] text-ink-muted mt-2 font-medium px-1">
+                Showing results for: <span class="text-terra font-bold">"{{ search_query }}"</span> 
+                (<a href="{{ url_for('dashboard') }}" class="underline hover:text-ink">Show all videos</a>)
+            </p>
+        {% endif %}
+    </div>
+
+    <div class="space-y-4 pt-2">
+        <h3 class="text-xs font-black uppercase tracking-wider text-ink-soft">🛡️Stream Inventory</h3>
+        
+        {% if videos %}
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for video in videos %}
+            <div class="group bg-white border border-cream-border rounded-2xl overflow-hidden shadow-premium flex flex-col justify-between transition-all hover:shadow-floating duration-300">
+                
+                <div class="relative aspect-video bg-stone-900 overflow-hidden">
+                    <img src="{{ video.thumbnail_url }}" 
+                         alt="{{ video.title }} Thumbnail" 
+                         class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                         onerror="this.src='https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=640&auto=format&fit=crop';">
+
+                    <div class="absolute top-3 left-3">
+                        {% if video.status == 'Ready' %}
+                            <span class="px-2 py-1 bg-white/90 backdrop-blur-md text-emerald-700 text-[9px] font-black tracking-wider uppercase rounded-md shadow-sm border border-emerald-200">
+                                Ready
+                            </span>
+                        {% elif video.status == 'Error' %}
+                            <span class="px-2 py-1 bg-rose-600 text-white text-[9px] font-black tracking-wider uppercase rounded-md shadow border border-transparent">
+                                Error
+                            </span>
+                        {% else %}
+                            <span class="px-2 py-1 bg-amber-500 text-white text-[9px] font-black tracking-wider uppercase rounded-md shadow animate-pulse">
+                                Processing
+                            </span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="p-4 space-y-4">
+                    <div>
+                        <h4 class="text-xs font-bold text-ink tracking-tight line-clamp-1 group-hover:text-terra transition-colors">{{ video.title }}</h4>
+                        
+                        <div class="flex items-center gap-1.5 text-[10px] text-ink-muted mt-1 font-medium">
+                            <i class="bi bi-bar-chart-steps text-terra"></i>
+                            <span>Views Volume Counter:</span>
+                            <span class="font-bold text-ink-soft font-mono">{{ video.views }} clicks</span>
+                        </div>
+                        
+                        {% if video.status == 'Processing' %}
+                        <div class="mt-3 pt-2.5 border-t border-cream-border/60 space-y-1.5" id="progress-container-{{ video.id }}">
+                            <div class="flex items-center justify-between text-[10px] font-bold text-ink-soft">
+                                <span class="flex items-center gap-1.5">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
+                                    Transcoding Video...
+                                </span>
+                                <span id="progress-text-{{ video.id }}" class="font-mono text-amber-600">{{ video.encoding_progress }}%</span>
+                            </div>
+                            <div class="w-full bg-stone-100 border border-cream-border/40 rounded-full h-1.5 overflow-hidden">
+                                <div id="progress-bar-{{ video.id }}" 
+                                     class="bg-amber-500 h-full transition-all duration-300 rounded-full shadow-inner" 
+                                     style="width: {{ video.encoding_progress }}%"></div>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="flex items-center gap-2 pt-3 border-t border-cream-border">
+                        {% if video.status == 'Ready' %}
+                        <a href="{{ url_for('watch', video_id=video.id) }}" class="flex-grow py-2 bg-cream hover:bg-terra text-ink-soft hover:text-white text-[11px] font-bold rounded-xl text-center border border-cream-border hover:border-transparent transition-all shadow-sm">
+                            <i class="bi bi-play-fill mr-0.5"></i> Watch Stream
+                        </a>
+                        {% else %}
+                        <button disabled class="flex-grow py-2 bg-stone-100 text-stone-400 text-[11px] font-bold rounded-xl text-center border border-stone-200/50 cursor-not-allowed">
+                            <i class="bi bi-hourglass-split mr-0.5"></i> Processing Asset
+                        </button>
+                        {% endif %}
+                        
+                        <form action="{{ url_for('delete_video', video_id=video.id) }}" method="POST" onsubmit="return confirm('Confirm complete removal of this tracking record configuration?');" class="inline">
+                            <button type="submit" class="px-2.5 py-2 bg-rose-50 hover:bg-rose-600 text-rose-500 hover:text-white text-[11px] rounded-xl border border-rose-100 hover:border-transparent transition-colors shadow-sm">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="border border-dashed border-cream-border rounded-2xl p-10 text-center max-w-sm mx-auto my-8 bg-white shadow-premium">
+            <div class="w-12 h-12 rounded-xl bg-cream border border-cream-border flex items-center justify-center text-ink-muted mx-auto mb-4 shadow-inner">
+                <i class="bi border-transparent {% if search_query %}bi-exclamation-circle text-amber-500{% else %}bi-folder2-open{% endif %} text-lg"></i>
+            </div>
+            <h4 class="text-xs font-bold text-ink">
+                {% if search_query %}No matching records located{% else %}No content records located{% endif %}
+            </h4>
+            <p class="text-[11px] text-ink-muted mt-1.5 leading-relaxed">
+                {% if search_query %}
+                    No videos match your search term. Try checking your spelling or clear the filter.
+                {% else %}
+                    Initialize an execution pipeline asset to begin building your stream dashboard tracks.
+                {% endif %}
+            </p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    // Graceful exit execution if no processing elements are captured in view matrix
+    if (document.querySelectorAll('[id^="progress-container-"]').length === 0) return;
+
+    const interval = setInterval(async () => {
+        try {
+            const response = await fetch('/api/video-progress');
+            if (!response.ok) throw new Error("Network query verification failure");
+            
+            const data = await response.json();
+
+            // Iterate over active progress keys mapped to nodes
+            Object.keys(data).forEach(videoId => {
+                const percent = data[videoId];
+                const textEl = document.getElementById(`progress-text-${videoId}`);
+                const barEl = document.getElementById(`progress-bar-${videoId}`);
+
+                if (textEl) textEl.textContent = `${percent}%`;
+                if (barEl) barEl.style.width = `${percent}%`;
+            });
+
+            // If processing nodes list returns completely clean, reload workspace view context layout
+            if (Object.keys(data).length === 0) {
+                clearInterval(interval);
+                window.location.reload();
+            }
+        } catch (err) {
+            console.error("Progress Polling Pipeline Exception: ", err);
+        }
+    }, 2000); // Poll target endpoint smoothly every 2 seconds
+});
+</script>
+{% endblock %}
